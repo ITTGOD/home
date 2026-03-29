@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>ระบบรายรับรายจ่ายคนงาน - Smart Finance</title>
+<title>ระบบรายรับรายจ่ายคนงาน V.1</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
   * {
@@ -368,25 +368,25 @@
 <body>
 <div class="container">
   <h1>
-    🧑‍🌾 ระบบรายรับรายจ่ายคนงาน 
-    <small>บันทึกง่าย วิเคราะห์ชัดเจน</small>
+      ระบบรายรับรายจ่ายคนงาน V1.0 By rachata
+    <small>Easy to calculate</small>
   </h1>
 
   <div class="dashboard-grid">
     <div class="card">
-      <h3>➕ เพิ่มคนงาน</h3>
+      <h3>เพิ่มรายชื่อคนงาน</h3>
       <div class="input-group">
-        <input type="text" id="workerName" placeholder="ชื่อเล่น หรือชื่อคนงาน" autocomplete="off">
-        <button onclick="addWorker()">✅ เพิ่มคนงาน</button>
+        <input type="text" id="workerName" placeholder="ชื่อคนงาน" autocomplete="off">
+        <button onclick="addWorker()">เพิ่มคนงาน</button>
       </div>
       <div class="input-group">
-        <input type="text" id="search" placeholder="🔍 ค้นหาชื่อคนงาน..." class="search-box" oninput="render()">
+        <input type="text" id="search" placeholder="ค้นหาชื่อคนงาน..." class="search-box" oninput="render()">
       </div>
       <div id="quickWorkerList" style="max-height: 200px; overflow-y: auto;"></div>
     </div>
 
     <div class="card">
-      <h3>📝 เพิ่มรายการ</h3>
+      <h3>เพิ่มรายการ</h3>
       <div class="input-group">
         <select id="workerSelect" style="flex:1"></select>
       </div>
@@ -400,15 +400,15 @@
         <input type="datetime-local" id="date">
       </div>
       <div class="type-selector">
-        <button id="btnIncome" class="btn-income" onclick="selectType('income')">💰 รายรับ</button>
-        <button id="btnExpense" class="btn-expense" onclick="selectType('expense')">💸 เบิกเงิน</button>
+        <button id="btnIncome" class="btn-income" onclick="selectType('income')">ทำงาน</button>
+        <button id="btnExpense" class="btn-expense" onclick="selectType('expense')">เบิกเงิน</button>
       </div>
       <button onclick="addRecord()" style="width:100%">บันทึกข้อมูล</button>
       <div id="selectedTypeMsg" style="margin-top: 12px; font-size:0.8rem; text-align:center;"></div>
     </div>
 
     <div class="card">
-      <h3>📊 ภาพรวมรายรับ-รายจ่าย</h3>
+      <h3>ภาพรวมทำงาน-เบิกเงิน</h3>
       <div class="chart-container">
         <canvas id="chart" style="max-height: 280px; width:100%"></canvas>
       </div>
@@ -417,10 +417,10 @@
   </div>
 
   <div class="card card-full">
-    <h3>📋 รายงานแยกตามคนงาน</h3>
+    <h3>รายงานข้อมูลการทำงาน-เบิกเงินแยกตามคนงาน</h3>
     <div id="summary" style="display: flex; flex-direction: column; gap: 20px;"></div>
   </div>
-  <footer>✨ ระบบบันทึกอัตโนมัติ | ข้อมูลเก็บในเครื่อง (Local Storage) | Made with ❤️</footer>
+  <footer>IDK HOW TO DO It's JUST A PROTOTYPE</footer>
 </div>
 
 <script>
@@ -453,9 +453,9 @@
     selectedType = type;
     const msgDiv = document.getElementById('selectedTypeMsg');
     if (type === 'income') {
-      msgDiv.innerHTML = '✅ เลือกแล้ว: <span class="green">รายรับ (+)</span>';
+      msgDiv.innerHTML = '✅ เลือกแล้ว: <span class="green">ทำงาน (+)</span>';
     } else {
-      msgDiv.innerHTML = '⚠️ เลือกแล้ว: <span class="red">รายจ่าย (-)</span>';
+      msgDiv.innerHTML = '⚠️ เลือกแล้ว: <span class="red">เบิกเงิน (-)</span>';
     }
     document.getElementById('btnIncome').style.opacity = type === 'income' ? '1' : '0.6';
     document.getElementById('btnExpense').style.opacity = type === 'expense' ? '1' : '0.6';
@@ -550,13 +550,13 @@
     const filteredWorkers = workers.filter(w => w.name.toLowerCase().includes(searchTerm));
     
     if (filteredWorkers.length === 0) {
-      quickListDiv.innerHTML = '<div class="empty-state">👷 ไม่พบคนงาน</div>';
+      quickListDiv.innerHTML = '<div class="empty-state">ไม่พบคนงาน</div>';
     } else {
       filteredWorkers.forEach((w, idx) => {
         const originalIdx = workers.findIndex(orig => orig.name === w.name && orig.records === w.records);
         quickListDiv.innerHTML += `
           <div class="worker-item">
-            <span><strong>🧑 ${escapeHtml(w.name)}</strong> <span class="badge">${w.records.length} รายการ</span></span>
+            <span><strong> ${escapeHtml(w.name)}</strong> <span class="badge">${w.records.length} รายการ</span></span>
             <span>
               <button onclick="editWorkerName(${originalIdx}, '${escapeHtml(w.name)}')" style="background:#f59e0b; color:white; padding:5px 12px; margin-right:5px;">✏️</button>
               <button onclick="removeWorkerCompletely(${originalIdx}, '${escapeHtml(w.name)}')" style="background:#ef4444; padding:5px 12px;">🗑️</button>
@@ -633,8 +633,8 @@
             </div>
           </div>
           <div style="display: flex; gap: 20px; flex-wrap:wrap; margin: 15px 0;">
-            <span style="background: #d1fae5; padding: 5px 15px; border-radius: 20px; color: #065f46;">💰 รายรับ: ${numberFormat(totalIncome)}</span>
-            <span style="background: #fee2e2; padding: 5px 15px; border-radius: 20px; color: #991b1b;">💸 รายจ่าย: ${numberFormat(totalExpense)}</span>
+            <span style="background: #d1fae5; padding: 5px 15px; border-radius: 20px; color: #065f46;">ทำงาน: ${numberFormat(totalIncome)}</span>
+            <span style="background: #fee2e2; padding: 5px 15px; border-radius: 20px; color: #991b1b;">เบิกเงิน: ${numberFormat(totalExpense)}</span>
             <span style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 5px 15px; border-radius: 20px;">📌 คงเหลือ: ${numberFormat(balance)}</span>
           </div>
           <hr>
@@ -649,9 +649,9 @@
     const netGlobal = totalIncomeGlobal - totalExpenseGlobal;
     globalDiv.innerHTML = `
       <div style="display:flex; justify-content:center; gap: 20px; flex-wrap:wrap;">
-        <div style="background: #d1fae5; padding: 8px 20px; border-radius: 30px;"><span class="green">📈 ยอดรับรวม: ${numberFormat(totalIncomeGlobal)}</span></div>
-        <div style="background: #fee2e2; padding: 8px 20px; border-radius: 30px;"><span class="red">📉 ยอดจ่ายรวม: ${numberFormat(totalExpenseGlobal)}</span></div>
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 8px 20px; border-radius: 30px; color: white;"><strong>⚖️ กำไรสุทธิ: ${numberFormat(netGlobal)}</strong></div>
+        <div style="background: #d1fae5; padding: 8px 20px; border-radius: 30px;"><span class="green">ยอดราบจากการทำงานรวม: ${numberFormat(totalIncomeGlobal)}</span></div>
+        <div style="background: #fee2e2; padding: 8px 20px; border-radius: 30px;"><span class="red">ยอดจากการเบิกเงินรวม: ${numberFormat(totalExpenseGlobal)}</span></div>
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 8px 20px; border-radius: 30px; color: white;"><strong>Total: ${numberFormat(netGlobal)}</strong></div>
       </div>
     `;
 
@@ -663,14 +663,14 @@
         labels: labels,
         datasets: [
           {
-            label: 'รายรับ (บาท)',
+            label: 'รายรับ',
             data: incomeData,
             backgroundColor: 'rgba(16, 185, 129, 0.8)',
             borderRadius: 12,
             barPercentage: 0.65,
           },
           {
-            label: 'รายจ่าย (บาท)',
+            label: 'รายจ่าย',
             data: expenseData,
             backgroundColor: 'rgba(239, 68, 68, 0.8)',
             borderRadius: 12,
