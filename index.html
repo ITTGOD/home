@@ -3,205 +3,727 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>ระบบบริหารรายรับ-รายจ่ายคนงาน | Smart Worker Finance</title>
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
-
+<title>ระบบรายรับรายจ่ายคนงาน - Smart Finance</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'Inter', sans-serif; background: #f0f4f8; padding: 24px 20px; color: #1e293b; }
-.container { max-width: 1300px; margin: 0 auto; }
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
 
-/* Header */
-.header { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; margin-bottom: 24px; gap: 12px; }
-h2 { font-weight: 700; font-size: 1.8rem; background: linear-gradient(135deg, #1e3c72, #2a5298); -webkit-background-clip: text; color: transparent; display: inline-flex; align-items: center; gap: 10px; }
-h2 i { color: #2a5298; }
+  body {
+    font-family: 'Prompt', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+    color: #1e2a3e;
+    animation: fadeIn 0.5s ease-out;
+  }
 
-/* Cards */
-.card { background: white; border-radius: 28px; padding: 20px 24px; margin-bottom: 24px; box-shadow: 0 8px 20px rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.03); }
-.card-title { font-weight: 600; font-size: 1.25rem; margin-bottom: 18px; display: flex; align-items: center; gap: 8px; border-left: 5px solid #2a5298; padding-left: 14px; color: #0f172a; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 
-/* Form Grid */
-.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; align-items: end; }
-.input-group { display: flex; flex-direction: column; gap: 6px; }
-.input-group label { font-size: 0.75rem; font-weight: 600; color: #5b6e8c; }
-input, select { padding: 12px 14px; border-radius: 18px; border: 1.5px solid #e2e8f0; font-size: 0.9rem; outline: none; width: 100%; }
-input:focus, select:focus { border-color: #2a5298; box-shadow: 0 0 0 3px rgba(42,82,152,0.1); }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(-30px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
 
-/* Buttons */
-.btn { padding: 12px 18px; border-radius: 40px; font-weight: 600; border: none; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 8px; justify-content: center; }
-.btn-primary { background: #1e3c72; color: white; }
-.btn-outline { background: white; border: 1.5px solid #cbd5e1; }
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+  }
 
-/* Type Selector */
-.type-selector { background: #f1f5f9; border-radius: 60px; padding: 6px; display: inline-flex; gap: 8px; margin-top: 8px; }
-.type-badge { padding: 10px 24px; border-radius: 40px; font-weight: 600; cursor: pointer; transition: 0.3s; color: #64748b; background: transparent; }
-.type-badge.active-income { background: #10b981; color: white; box-shadow: 0 4px 12px rgba(16,185,129,0.3); }
-.type-badge.active-expense { background: #ef4444; color: white; box-shadow: 0 4px 12px rgba(239,68,68,0.3); }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
 
-/* Worker Cards */
-.workers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; margin-top: 20px; }
-.worker-card { background: white; border-radius: 24px; padding: 18px; border: 1px solid #edf2f7; }
-.worker-name { font-size: 1.2rem; font-weight: 700; border-bottom: 2px dashed #f1f5f9; padding-bottom: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; }
-.stats { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.95rem; }
-.income-stat { color: #10b981; font-weight: 600; }
-.expense-stat { color: #ef4444; font-weight: 600; }
-.balance { font-weight: 800; font-size: 1.1rem; text-align: right; margin-top: 10px; padding-top: 10px; border-top: 1px solid #f1f5f9; }
-.positive { color: #10b981; } .negative { color: #ef4444; }
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
 
-@media (max-width: 680px) { .form-grid { grid-template-columns: 1fr; } }
+  h1 {
+    font-size: 2rem;
+    margin: 0 0 10px 0;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    animation: slideIn 0.5s ease-out;
+  }
+
+  h1 small {
+    font-size: 0.8rem;
+    font-weight: normal;
+    background: rgba(255,255,255,0.2);
+    backdrop-filter: blur(10px);
+    padding: 5px 15px;
+    border-radius: 40px;
+    color: white;
+  }
+
+  h2, h3 {
+    margin-top: 0;
+    color: #2d3748;
+    border-left: 5px solid #667eea;
+    padding-left: 12px;
+    font-size: 1.3rem;
+  }
+
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 25px;
+    margin-bottom: 25px;
+  }
+
+  .card {
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 28px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    padding: 1.5rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid rgba(255,255,255,0.2);
+    animation: scaleIn 0.4s ease-out;
+  }
+
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+  }
+
+  .card-full {
+    grid-column: 1 / -1;
+  }
+
+  .input-group {
+    margin-bottom: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .input-group label {
+    font-weight: 600;
+    min-width: 80px;
+    color: #4a5568;
+  }
+
+  input, select, button {
+    padding: 12px 16px;
+    border-radius: 60px;
+    border: 2px solid #e2e8f0;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    background: white;
+    font-family: inherit;
+  }
+
+  input:focus, select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102,126,234,0.2);
+    transform: scale(1.02);
+  }
+
+  button {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+  }
+
+  button:hover::before {
+    width: 300px;
+    height: 300px;
+  }
+
+  button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+  }
+
+  button:active {
+    transform: translateY(0);
+  }
+
+  .btn-secondary {
+    background: linear-gradient(135deg, #868f96 0%, #596164 100%);
+  }
+
+  .btn-income {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  }
+
+  .btn-expense {
+    background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+  }
+
+  .type-selector {
+    display: flex;
+    gap: 12px;
+    margin: 15px 0;
+  }
+
+  .type-selector button {
+    flex: 1;
+    transition: all 0.3s ease;
+  }
+
+  .badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 4px 12px;
+    border-radius: 40px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: white;
+  }
+
+  .worker-item {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    padding: 10px 15px;
+    border-radius: 50px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+    animation: slideIn 0.3s ease-out;
+  }
+
+  .worker-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  }
+
+  .record-line {
+    background: linear-gradient(135deg, #fff9e6 0%, #fff5d6 100%);
+    margin: 8px 0;
+    padding: 12px 15px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+    animation: slideIn 0.3s ease-out;
+  }
+
+  .record-line:hover {
+    transform: translateX(5px);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  }
+
+  .delete-btn {
+    background: rgba(185,28,28,0.1);
+    color: #b91c1c;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 5px 12px;
+    border-radius: 30px;
+    transition: all 0.3s ease;
+  }
+
+  .delete-btn:hover {
+    background: #b91c1c;
+    color: white;
+    transform: scale(1.1);
+  }
+
+  .delete-btn::before {
+    display: none;
+  }
+
+  .summary-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+
+  .balance {
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+
+  .green {
+    color: #10b981;
+    font-weight: 600;
+  }
+
+  .red {
+    color: #ef4444;
+    font-weight: 600;
+  }
+
+  hr {
+    margin: 12px 0;
+    border: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+  }
+
+  .search-box {
+    width: 100%;
+    padding: 10px 16px;
+    border-radius: 40px;
+    margin-bottom: 15px;
+    border: 2px solid #e2e8f0;
+    transition: all 0.3s ease;
+  }
+
+  .search-box:focus {
+    border-color: #667eea;
+    transform: scale(1.02);
+  }
+
+  .empty-state {
+    text-align: center;
+    color: #6c757d;
+    padding: 20px;
+    font-style: italic;
+    animation: pulse 2s infinite;
+  }
+
+  .chart-container {
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  footer {
+    text-align: center;
+    margin-top: 30px;
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.8);
+  }
+
+  /* Scrollbar Styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #764ba2;
+  }
+
+  @media (max-width: 700px) {
+    body { padding: 12px; }
+    .card { padding: 1rem; }
+    .input-group { flex-direction: column; align-items: stretch; }
+    .type-selector { justify-content: center; }
+    h1 { font-size: 1.5rem; }
+  }
+
+  /* Loading Animation */
+  @keyframes shimmer {
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
+  }
+
+  .loading {
+    animation: shimmer 2s infinite linear;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 1000px 100%;
+  }
 </style>
 </head>
-
 <body>
-
 <div class="container">
-    <div class="header">
-        <h2><i class="fas fa-users-viewfinder"></i> ระบบรายรับรายจ่ายคนงาน</h2>
-        <div style="font-size: 0.8rem; background: #eef2ff; padding: 6px 14px; border-radius: 40px;">
-            <i class="fas fa-database"></i> Realtime Sync Active
-        </div>
+  <h1>
+    🧑‍🌾 ระบบรายรับรายจ่ายคนงาน 
+    <small>บันทึกง่าย วิเคราะห์ชัดเจน</small>
+  </h1>
+
+  <div class="dashboard-grid">
+    <div class="card">
+      <h3>➕ เพิ่มคนงาน</h3>
+      <div class="input-group">
+        <input type="text" id="workerName" placeholder="ชื่อเล่น หรือชื่อคนงาน" autocomplete="off">
+        <button onclick="addWorker()">✅ เพิ่มคนงาน</button>
+      </div>
+      <div class="input-group">
+        <input type="text" id="search" placeholder="🔍 ค้นหาชื่อคนงาน..." class="search-box" oninput="render()">
+      </div>
+      <div id="quickWorkerList" style="max-height: 200px; overflow-y: auto;"></div>
     </div>
 
     <div class="card">
-        <div class="card-title"><i class="fas fa-user-plus"></i> เพิ่มคนงานใหม่</div>
-        <div class="form-grid">
-            <div class="input-group">
-                <label>ชื่อคนงาน</label>
-                <input id="workerName" placeholder="ระบุชื่อ-นามสกุล">
-            </div>
-            <button onclick="addWorker()" class="btn btn-primary"><i class="fas fa-plus"></i> เพิ่มคนงาน</button>
-        </div>
+      <h3>📝 เพิ่มรายการ</h3>
+      <div class="input-group">
+        <select id="workerSelect" style="flex:1"></select>
+      </div>
+      <div class="input-group">
+        <input type="number" id="amount" placeholder="จำนวนเงิน" step="any">
+      </div>
+      <div class="input-group">
+        <input type="text" id="note" placeholder="หมายเหตุ">
+      </div>
+      <div class="input-group">
+        <input type="datetime-local" id="date">
+      </div>
+      <div class="type-selector">
+        <button id="btnIncome" class="btn-income" onclick="selectType('income')">💰 รายรับ</button>
+        <button id="btnExpense" class="btn-expense" onclick="selectType('expense')">💸 เบิกเงิน</button>
+      </div>
+      <button onclick="addRecord()" style="width:100%">บันทึกข้อมูล</button>
+      <div id="selectedTypeMsg" style="margin-top: 12px; font-size:0.8rem; text-align:center;"></div>
     </div>
 
     <div class="card">
-        <div class="card-title"><i class="fas fa-coins"></i> บันทึกรายการ</div>
-        <div class="form-grid">
-            <div class="input-group">
-                <label>เลือกคนงาน</label>
-                <select id="workerSelect">
-                    <option value="">-- เลือกคนงาน --</option>
-                </select>
-            </div>
-            <div class="input-group">
-                <label>จำนวนเงิน (บาท)</label>
-                <input id="amount" type="number" placeholder="0.00">
-            </div>
-            <div class="input-group">
-                <label>หมายเหตุ</label>
-                <input id="note" placeholder="ระบุรายละเอียด">
-            </div>
-            <div class="input-group">
-                <label>วันที่</label>
-                <input id="date" type="datetime-local">
-            </div>
-        </div>
-
-        <div style="margin-top: 20px;">
-            <p style="font-size: 0.75rem; font-weight: 700; color: #64748b; margin-bottom: 8px;">ประเภทรายการ</p>
-            <div class="type-selector">
-                <div id="incomeBtn" class="type-badge" onclick="selectType('income')">ทำงาน</div>
-                <div id="expenseBtn" class="type-badge" onclick="selectType('expense')">เบิกเงิน</div>
-            </div>
-        </div>
-
-        <div style="margin-top: 24px; display: flex; gap: 10px;">
-            <button onclick="addRecord()" class="btn btn-primary" style="flex: 2;"><i class="fas fa-save"></i> บันทึกข้อมูล</button>
-            <button onclick="resetForm()" class="btn btn-outline" style="flex: 1;">ล้างฟอร์ม</button>
-        </div>
-        <div id="statusMsg"></div>
+      <h3>📊 ภาพรวมรายรับ-รายจ่าย</h3>
+      <div class="chart-container">
+        <canvas id="chart" style="max-height: 280px; width:100%"></canvas>
+      </div>
+      <div id="globalSummary" style="margin-top: 12px; text-align:center; font-size:0.9rem;"></div>
     </div>
+  </div>
 
-    <div class="card">
-        <div class="card-title"><i class="fas fa-chart-pie"></i> สรุปภาพรวม</div>
-        <canvas id="chart"></canvas>
-        <div id="summary"></div>
-    </div>
+  <div class="card card-full">
+    <h3>📋 รายงานแยกตามคนงาน</h3>
+    <div id="summary" style="display: flex; flex-direction: column; gap: 20px;"></div>
+  </div>
+  <footer>✨ ระบบบันทึกอัตโนมัติ | ข้อมูลเก็บในเครื่อง (Local Storage) | Made with ❤️</footer>
 </div>
 
 <script>
-let workers = [];
-let selectedType = null;
-let chartInstance = null;
+  let workers = JSON.parse(localStorage.getItem('workers')) || [];
+  let selectedType = null;
+  let chart;
 
-const workerSelect = document.getElementById('workerSelect');
-const amountInput = document.getElementById('amount');
-const noteInput = document.getElementById('note');
-const dateInput = document.getElementById('date');
+  function save() {
+    localStorage.setItem('workers', JSON.stringify(workers));
+  }
 
-// ===== LocalStorage =====
-function saveData() {
-    localStorage.setItem("workers", JSON.stringify(workers));
-}
+  function addWorker() {
+    const nameInput = document.getElementById('workerName');
+    let name = nameInput.value.trim();
+    if (!name) {
+      alert("กรุณากรอกชื่อคนงาน");
+      return;
+    }
+    if (workers.some(w => w.name.toLowerCase() === name.toLowerCase())) {
+      alert("มีคนงานชื่อนี้อยู่แล้ว!");
+      return;
+    }
+    workers.push({ name: name, records: [] });
+    nameInput.value = '';
+    save();
+    render();
+  }
 
-function loadData() {
-    const data = localStorage.getItem("workers");
-    if (data) workers = JSON.parse(data);
-}
-
-// ===== Default Date =====
-function setDefaultDate() {
-    const now = new Date();
-    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-    dateInput.value = now.toISOString().slice(0, 16);
-}
-setDefaultDate();
-
-// ===== Type =====
-function selectType(type) {
+  function selectType(type) {
     selectedType = type;
-    document.getElementById('incomeBtn').className = 'type-badge' + (type === 'income' ? ' active-income' : '');
-    document.getElementById('expenseBtn').className = 'type-badge' + (type === 'expense' ? ' active-expense' : '');
-}
+    const msgDiv = document.getElementById('selectedTypeMsg');
+    if (type === 'income') {
+      msgDiv.innerHTML = '✅ เลือกแล้ว: <span class="green">รายรับ (+)</span>';
+    } else {
+      msgDiv.innerHTML = '⚠️ เลือกแล้ว: <span class="red">รายจ่าย (-)</span>';
+    }
+    document.getElementById('btnIncome').style.opacity = type === 'income' ? '1' : '0.6';
+    document.getElementById('btnExpense').style.opacity = type === 'expense' ? '1' : '0.6';
+  }
 
-// ===== Add Worker =====
-function addWorker() {
-    const name = document.getElementById('workerName').value.trim();
-    if (!name) return alert("กรอกชื่อ");
+  function addRecord() {
+    const workerIdx = document.getElementById('workerSelect').value;
+    let amount = parseFloat(document.getElementById('amount').value);
+    const note = document.getElementById('note').value.trim();
+    const dateRaw = document.getElementById('date').value;
 
-    workers.push({ name, records: [] });
-    saveData();
-    renderUI();
-}
+    if (workerIdx === '' || workerIdx === null) {
+      alert("กรุณาเลือกคนงาน");
+      return;
+    }
+    if (isNaN(amount) || amount <= 0) {
+      alert("กรุณากรอกจำนวนเงินที่ถูกต้อง (มากกว่า 0)");
+      return;
+    }
+    if (!selectedType) {
+      alert("กรุณาเลือกประเภท 'รายรับ' หรือ 'รายจ่าย'");
+      return;
+    }
+    if (!dateRaw) {
+      alert("กรุณาเลือกวันเวลา");
+      return;
+    }
 
-// ===== Add Record =====
-function addRecord() {
-    const idx = workerSelect.value;
-    const amount = parseFloat(amountInput.value);
+    const displayDate = new Date(dateRaw).toLocaleString('th-TH', { hour12: false });
 
-    if (idx === "") return alert("เลือกคนงาน");
-    if (!selectedType) return alert("เลือกประเภท");
-
-    workers[idx].records.push({
-        type: selectedType,
-        amount,
-        note: noteInput.value || "-",
-        date: dateInput.value
+    workers[workerIdx].records.push({
+      type: selectedType,
+      amount: amount,
+      note: note || "-",
+      date: dateRaw,
+      displayDate: displayDate
     });
 
-    saveData();
-    renderUI();
-}
+    document.getElementById('amount').value = '';
+    document.getElementById('note').value = '';
+    document.getElementById('date').value = '';
+    selectedType = null;
+    document.getElementById('selectedTypeMsg').innerHTML = '';
+    document.getElementById('btnIncome').style.opacity = '0.6';
+    document.getElementById('btnExpense').style.opacity = '0.6';
+    save();
+    render();
+  }
 
-// ===== Render =====
-function renderUI() {
-    workerSelect.innerHTML = '<option value="">-- เลือกคนงาน --</option>';
-    workers.forEach((w, i) => {
-        const opt = document.createElement('option');
-        opt.value = i;
-        opt.innerText = w.name;
-        workerSelect.appendChild(opt);
+  function deleteRecord(workerIdx, recordIdx) {
+    if (confirm("ลบรายการนี้ใช่หรือไม่?")) {
+      workers[workerIdx].records.splice(recordIdx, 1);
+      save();
+      render();
+    }
+  }
+
+  function editWorkerName(workerIdx, oldName) {
+    let newName = prompt("แก้ไขชื่อคนงาน", oldName);
+    if (newName && newName.trim() !== "") {
+      newName = newName.trim();
+      if (workers.some((w, idx) => idx !== workerIdx && w.name.toLowerCase() === newName.toLowerCase())) {
+        alert("ชื่อนี้มีอยู่แล้วในระบบ");
+        return;
+      }
+      workers[workerIdx].name = newName;
+      save();
+      render();
+    }
+  }
+
+  function deleteAllRecordsOfWorker(workerIdx, workerName) {
+    if (confirm(`❗ ลบประวัติทั้งหมดของ "${workerName}" ? (คนงานจะยังคงอยู่ในระบบ)`)) {
+      workers[workerIdx].records = [];
+      save();
+      render();
+    }
+  }
+
+  function removeWorkerCompletely(workerIdx, workerName) {
+    if (confirm(`⚠️ ลบคนงาน "${workerName}" และข้อมูลทั้งหมดอย่างถาวร?`)) {
+      workers.splice(workerIdx, 1);
+      save();
+      render();
+    }
+  }
+
+  function render() {
+    const searchTerm = document.getElementById('search').value.toLowerCase();
+    const quickListDiv = document.getElementById('quickWorkerList');
+    quickListDiv.innerHTML = '';
+    const filteredWorkers = workers.filter(w => w.name.toLowerCase().includes(searchTerm));
+    
+    if (filteredWorkers.length === 0) {
+      quickListDiv.innerHTML = '<div class="empty-state">👷 ไม่พบคนงาน</div>';
+    } else {
+      filteredWorkers.forEach((w, idx) => {
+        const originalIdx = workers.findIndex(orig => orig.name === w.name && orig.records === w.records);
+        quickListDiv.innerHTML += `
+          <div class="worker-item">
+            <span><strong>🧑 ${escapeHtml(w.name)}</strong> <span class="badge">${w.records.length} รายการ</span></span>
+            <span>
+              <button onclick="editWorkerName(${originalIdx}, '${escapeHtml(w.name)}')" style="background:#f59e0b; color:white; padding:5px 12px; margin-right:5px;">✏️</button>
+              <button onclick="removeWorkerCompletely(${originalIdx}, '${escapeHtml(w.name)}')" style="background:#ef4444; padding:5px 12px;">🗑️</button>
+            </span>
+          </div>
+        `;
+      });
+    }
+
+    const selectEl = document.getElementById('workerSelect');
+    selectEl.innerHTML = '<option value="">-- เลือกคนงาน --</option>';
+    workers.forEach((worker, idx) => {
+      selectEl.innerHTML += `<option value="${idx}">${escapeHtml(worker.name)}</option>`;
     });
-}
 
-window.onload = () => {
-    loadData();
-    renderUI();
-};
+    let labels = [];
+    let incomeData = [];
+    let expenseData = [];
+    let totalIncomeGlobal = 0;
+    let totalExpenseGlobal = 0;
+
+    const summaryContainer = document.getElementById('summary');
+    summaryContainer.innerHTML = '';
+
+    workers.forEach((worker, wIdx) => {
+      if (!worker.name.toLowerCase().includes(searchTerm)) return;
+
+      let totalIncome = 0;
+      let totalExpense = 0;
+      let recordsHtml = '';
+
+      const sortedRecords = [...worker.records].sort((a,b) => new Date(a.date) - new Date(b.date));
+      
+      sortedRecords.forEach((rec, rIdx) => {
+        const realIndex = worker.records.findIndex(orig => orig.date === rec.date && orig.amount === rec.amount && orig.note === rec.note && orig.type === rec.type);
+        const amountVal = rec.amount;
+        if (rec.type === 'income') {
+          totalIncome += amountVal;
+        } else {
+          totalExpense += amountVal;
+        }
+
+        const dateShow = rec.displayDate ? rec.displayDate : new Date(rec.date).toLocaleString('th-TH');
+        const sign = rec.type === 'income' ? '+' : '-';
+        const colorClass = rec.type === 'income' ? 'green' : 'red';
+        
+        recordsHtml += `
+          <div class="record-line">
+            <div>
+              <span class="${colorClass}"><strong>${sign} ${numberFormat(amountVal)}</strong></span> 
+              <span>📝 ${escapeHtml(rec.note)}</span><br>
+              <small>🕒 ${dateShow}</small>
+            </div>
+            <button class="delete-btn" onclick="deleteRecord(${wIdx}, ${realIndex})" title="ลบรายการ">🗑️</button>
+          </div>
+        `;
+      });
+
+      const balance = totalIncome - totalExpense;
+      totalIncomeGlobal += totalIncome;
+      totalExpenseGlobal += totalExpense;
+
+      labels.push(worker.name);
+      incomeData.push(totalIncome);
+      expenseData.push(totalExpense);
+
+      summaryContainer.innerHTML += `
+        <div style="background: white; border-radius: 28px; padding: 1.5rem; box-shadow: 0 4px 20px rgba(0,0,0,0.08); transition: all 0.3s ease;">
+          <div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap:wrap; margin-bottom: 15px;">
+            <h3 style="margin:0; color: #667eea;">👤 ${escapeHtml(worker.name)}</h3>
+            <div>
+              <button onclick="deleteAllRecordsOfWorker(${wIdx}, '${escapeHtml(worker.name)}')" style="background:#f59e0b; padding:6px 14px; font-size:0.75rem;">🧹 ล้างประวัติ</button>
+              <button onclick="removeWorkerCompletely(${wIdx}, '${escapeHtml(worker.name)}')" style="background:#ef4444; padding:6px 14px; font-size:0.75rem; margin-left:5px;">❌ ลบคนงาน</button>
+            </div>
+          </div>
+          <div style="display: flex; gap: 20px; flex-wrap:wrap; margin: 15px 0;">
+            <span style="background: #d1fae5; padding: 5px 15px; border-radius: 20px; color: #065f46;">💰 รายรับ: ${numberFormat(totalIncome)}</span>
+            <span style="background: #fee2e2; padding: 5px 15px; border-radius: 20px; color: #991b1b;">💸 รายจ่าย: ${numberFormat(totalExpense)}</span>
+            <span style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 5px 15px; border-radius: 20px;">📌 คงเหลือ: ${numberFormat(balance)}</span>
+          </div>
+          <hr>
+          <div style="max-height: 260px; overflow-y: auto;">
+            ${recordsHtml || '<div class="empty-state">📭 ยังไม่มีรายการ</div>'}
+          </div>
+        </div>
+      `;
+    });
+
+    const globalDiv = document.getElementById('globalSummary');
+    const netGlobal = totalIncomeGlobal - totalExpenseGlobal;
+    globalDiv.innerHTML = `
+      <div style="display:flex; justify-content:center; gap: 20px; flex-wrap:wrap;">
+        <div style="background: #d1fae5; padding: 8px 20px; border-radius: 30px;"><span class="green">📈 ยอดรับรวม: ${numberFormat(totalIncomeGlobal)}</span></div>
+        <div style="background: #fee2e2; padding: 8px 20px; border-radius: 30px;"><span class="red">📉 ยอดจ่ายรวม: ${numberFormat(totalExpenseGlobal)}</span></div>
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 8px 20px; border-radius: 30px; color: white;"><strong>⚖️ กำไรสุทธิ: ${numberFormat(netGlobal)}</strong></div>
+      </div>
+    `;
+
+    if (chart) chart.destroy();
+    const ctx = document.getElementById('chart').getContext('2d');
+    chart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: 'รายรับ (บาท)',
+            data: incomeData,
+            backgroundColor: 'rgba(16, 185, 129, 0.8)',
+            borderRadius: 12,
+            barPercentage: 0.65,
+          },
+          {
+            label: 'รายจ่าย (บาท)',
+            data: expenseData,
+            backgroundColor: 'rgba(239, 68, 68, 0.8)',
+            borderRadius: 12,
+            barPercentage: 0.65,
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: ${numberFormat(ctx.raw)} บาท` } },
+          legend: { position: 'top', labels: { usePointStyle: true, boxWidth: 10 } }
+        },
+        scales: {
+          y: { beginAtZero: true, title: { display: true, text: 'บาท', font: { weight: 'bold' } }, grid: { color: '#e2e8f0' } },
+          x: { grid: { display: false } }
+        },
+        animation: {
+          duration: 1000,
+          easing: 'easeInOutQuart'
+        }
+      }
+    });
+
+    const dateInput = document.getElementById('date');
+    if (!dateInput.value) {
+      const now = new Date();
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+      dateInput.value = now.toISOString().slice(0, 16);
+    }
+  }
+
+  function numberFormat(num) {
+    if (num === undefined || num === null) return '0';
+    return num.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+      if (m === '&') return '&amp;';
+      if (m === '<') return '&lt;';
+      if (m === '>') return '&gt;';
+      return m;
+    });
+  }
+
+  window.addEventListener('load', () => {
+    render();
+    document.getElementById('btnIncome').style.opacity = '0.6';
+    document.getElementById('btnExpense').style.opacity = '0.6';
+  });
 </script>
-
 </body>
 </html>
