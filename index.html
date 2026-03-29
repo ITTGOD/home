@@ -9,8 +9,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -57,6 +55,7 @@ input:focus, select:focus { border-color: #2a5298; box-shadow: 0 0 0 3px rgba(42
 @media (max-width: 680px) { .form-grid { grid-template-columns: 1fr; } }
 </style>
 </head>
+
 <body>
 
 <div class="container">
@@ -84,7 +83,7 @@ input:focus, select:focus { border-color: #2a5298; box-shadow: 0 0 0 3px rgba(42
             <div class="input-group">
                 <label>เลือกคนงาน</label>
                 <select id="workerSelect">
-                    <option value="">-- กำลังโหลดข้อมูล --</option>
+                    <option value="">-- เลือกคนงาน --</option>
                 </select>
             </div>
             <div class="input-group">
@@ -104,54 +103,46 @@ input:focus, select:focus { border-color: #2a5298; box-shadow: 0 0 0 3px rgba(42
         <div style="margin-top: 20px;">
             <p style="font-size: 0.75rem; font-weight: 700; color: #64748b; margin-bottom: 8px;">ประเภทรายการ</p>
             <div class="type-selector">
-                <div id="incomeBtn" class="type-badge" onclick="selectType('income')"><i class="fas fa-arrow-up"></i> ทำงาน (เงินเข้า)</div>
-                <div id="expenseBtn" class="type-badge" onclick="selectType('expense')"><i class="fas fa-arrow-down"></i> เบิกเงิน (เงินออก)</div>
+                <div id="incomeBtn" class="type-badge" onclick="selectType('income')">ทำงาน</div>
+                <div id="expenseBtn" class="type-badge" onclick="selectType('expense')">เบิกเงิน</div>
             </div>
         </div>
 
         <div style="margin-top: 24px; display: flex; gap: 10px;">
-            <button onclick="addRecord()" class="btn btn-primary" style="flex: 2; background: #2a5298;"><i class="fas fa-save"></i> บันทึกข้อมูล</button>
-            <button onclick="resetForm()" class="btn btn-outline" style="flex: 1;"><i class="fas fa-eraser"></i> ล้างฟอร์ม</button>
+            <button onclick="addRecord()" class="btn btn-primary" style="flex: 2;"><i class="fas fa-save"></i> บันทึกข้อมูล</button>
+            <button onclick="resetForm()" class="btn btn-outline" style="flex: 1;">ล้างฟอร์ม</button>
         </div>
-        <div id="statusMsg" style="margin-top: 10px; font-size: 0.8rem; color: #ef4444; font-weight: 600;"></div>
+        <div id="statusMsg"></div>
     </div>
 
     <div class="card">
         <div class="card-title"><i class="fas fa-chart-pie"></i> สรุปภาพรวม</div>
-        <div style="margin-bottom: 20px;">
-            <canvas id="chart" style="max-height: 300px;"></canvas>
-        </div>
+        <canvas id="chart"></canvas>
         <div id="summary"></div>
     </div>
 </div>
 
 <script>
-// Firebase Configuration
-const firebaseConfig = {
-    apiKey: "AIzaSyBBf_AXeMoh01UVVn6ToBueaA8jNBfu8RM",
-    authDomain: "home-cdb7b.firebaseapp.com",
-    databaseURL: "https://home-cdb7b-default-rtdb.firebaseio.com",
-    projectId: "home-cdb7b",
-    storageBucket: "home-cdb7b.firebasestorage.app",
-    messagingSenderId: "292842848697",
-    appId: "1:292842848697:web:5143639eccc490b1eef668"
-};
-
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-
 let workers = [];
 let selectedType = null;
 let chartInstance = null;
 
-// DOM Elements
 const workerSelect = document.getElementById('workerSelect');
 const amountInput = document.getElementById('amount');
 const noteInput = document.getElementById('note');
 const dateInput = document.getElementById('date');
-const statusMsg = document.getElementById('statusMsg');
 
-// ตั้งค่าวันที่ปัจจุบัน
+// ===== LocalStorage =====
+function saveData() {
+    localStorage.setItem("workers", JSON.stringify(workers));
+}
+
+function loadData() {
+    const data = localStorage.getItem("workers");
+    if (data) workers = JSON.parse(data);
+}
+
+// ===== Default Date =====
 function setDefaultDate() {
     const now = new Date();
     now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
@@ -159,85 +150,44 @@ function setDefaultDate() {
 }
 setDefaultDate();
 
-// เลือกประเภทรายการ
+// ===== Type =====
 function selectType(type) {
     selectedType = type;
     document.getElementById('incomeBtn').className = 'type-badge' + (type === 'income' ? ' active-income' : '');
     document.getElementById('expenseBtn').className = 'type-badge' + (type === 'expense' ? ' active-expense' : '');
-    statusMsg.innerText = "";
 }
 
-// โหลดข้อมูลจาก Firebase
-db.ref("workers").on("value", (snapshot) => {
-    const data = snapshot.val();
-    
-    // แปลงข้อมูลจาก Firebase (Object) ให้เป็น Array เสมอ
-    if (!data) {
-        workers = [];
-    } else if (Array.isArray(data)) {
-        workers = data.filter(item => item !== null);
-    } else {
-        workers = Object.values(data);
-    }
-
-    // ตรวจสอบโครงสร้าง records ข้างในด้วย
-    workers = workers.map(w => ({
-        ...w,
-        records: w.records ? (Array.isArray(w.records) ? w.records : Object.values(w.records)) : []
-    }));
-
-    renderUI();
-});
-
-// บันทึกข้อมูลกลับไป Firebase
-function syncData() {
-    db.ref("workers").set(workers);
-}
-
-// เพิ่มคนงาน
+// ===== Add Worker =====
 function addWorker() {
     const name = document.getElementById('workerName').value.trim();
-    if (!name) return alert("กรุณาใส่ชื่อคนงาน");
-    
-    workers.push({ name: name, records: [] });
-    document.getElementById('workerName').value = "";
-    syncData();
+    if (!name) return alert("กรอกชื่อ");
+
+    workers.push({ name, records: [] });
+    saveData();
+    renderUI();
 }
 
-// เพิ่มรายการ รายรับ/รายจ่าย
+// ===== Add Record =====
 function addRecord() {
     const idx = workerSelect.value;
     const amount = parseFloat(amountInput.value);
-    
-    if (idx === "") return alert("กรุณาเลือกคนงาน");
-    if (isNaN(amount) || amount <= 0) return alert("กรุณาระบุจำนวนเงิน");
-    if (!selectedType) return statusMsg.innerText = "⚠️ โปรดเลือกประเภท (ทำงาน หรือ เบิกเงิน)";
 
-    const record = {
+    if (idx === "") return alert("เลือกคนงาน");
+    if (!selectedType) return alert("เลือกประเภท");
+
+    workers[idx].records.push({
         type: selectedType,
-        amount: amount,
+        amount,
         note: noteInput.value || "-",
-        date: dateInput.value,
-        ts: Date.now()
-    };
+        date: dateInput.value
+    });
 
-    workers[idx].records.push(record);
-    syncData();
-    resetForm();
-    alert("บันทึกสำเร็จ!");
+    saveData();
+    renderUI();
 }
 
-function resetForm() {
-    amountInput.value = "";
-    noteInput.value = "";
-    selectedType = null;
-    document.getElementById('incomeBtn').className = 'type-badge';
-    document.getElementById('expenseBtn').className = 'type-badge';
-    setDefaultDate();
-}
-
+// ===== Render =====
 function renderUI() {
-    // 1. อัปเดตรายชื่อใน Select
     workerSelect.innerHTML = '<option value="">-- เลือกคนงาน --</option>';
     workers.forEach((w, i) => {
         const opt = document.createElement('option');
@@ -245,70 +195,13 @@ function renderUI() {
         opt.innerText = w.name;
         workerSelect.appendChild(opt);
     });
-
-    // 2. แสดงการ์ดสรุปและคำนวณเงิน
-    let summaryHtml = '<div class="workers-grid">';
-    let labels = [];
-    let incomeData = [];
-    let expenseData = [];
-
-    workers.forEach(w => {
-        let totalInc = 0;
-        let totalExp = 0;
-        w.records.forEach(r => {
-            if (r.type === 'income') totalInc += r.amount;
-            else totalExp += r.amount;
-        });
-
-        const bal = totalInc - totalExp;
-        labels.push(w.name);
-        incomeData.push(totalInc);
-        expenseData.push(totalExp);
-
-        summaryHtml += `
-            <div class="worker-card">
-                <div class="worker-name">
-                    <span>${w.name}</span>
-                    <small style="font-size:0.7rem; color:#94a3b8;">${w.records.length} รายการ</small>
-                </div>
-                <div class="stats">
-                    <span>ทำงาน:</span> <span class="income-stat">+${totalInc.toLocaleString()}</span>
-                </div>
-                <div class="stats">
-                    <span>เบิกเงิน:</span> <span class="expense-stat">-${totalExp.toLocaleString()}</span>
-                </div>
-                <div class="balance ${bal >= 0 ? 'positive' : 'negative'}">
-                    คงเหลือ: ${bal.toLocaleString()} ฿
-                </div>
-            </div>
-        `;
-    });
-    
-    document.getElementById('summary').innerHTML = summaryHtml + '</div>';
-
-    // 3. อัปเดตกราฟ
-    updateChart(labels, incomeData, expenseData);
 }
 
-function updateChart(labels, inc, exp) {
-    const ctx = document.getElementById('chart').getContext('2d');
-    if (chartInstance) chartInstance.destroy();
-    
-    chartInstance = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [
-                { label: 'ยอดทำงาน', data: inc, backgroundColor: '#10b981', borderRadius: 8 },
-                { label: 'ยอดเบิก', data: exp, backgroundColor: '#ef4444', borderRadius: 8 }
-            ]
-        },
-        options: {
-            responsive: true,
-            scales: { y: { beginAtZero: true } }
-        }
-    });
-}
+window.onload = () => {
+    loadData();
+    renderUI();
+};
 </script>
+
 </body>
 </html>
